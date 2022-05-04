@@ -38,7 +38,7 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     tmp->matnum = matnum;
     strcpy(tmp->vorname, vorname);
     strcpy(tmp->nachname, nachname);
-    tmp->next = NULL; 
+    tmp->next = NULL;
     /* Füge den neuen Eintrag in die Liste ein */
     /* Ist die Liste leer ? */
     if (is_empty(*studenten_liste))
@@ -84,7 +84,7 @@ bool dequeue(stud_type **studenten_liste, int matnum)
     /* Prüfe Randbedingungen */
     if (is_empty(*studenten_liste))
     {
-        return false; // Gilt das als Fehler?
+        return false;
     }
     /* Finde den Studenten */
     /* Was muss passieren wenn das 1. Element gelöscht wird? */
@@ -113,7 +113,9 @@ bool dequeue(stud_type **studenten_liste, int matnum)
     if (gefunden)
     {
         free(p);
+        return true;
     }
+    return false;
     /* ... */
 }
 
