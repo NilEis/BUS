@@ -152,7 +152,7 @@ bool get_student(stud_type const *studenten_liste, int matnum, char vorname[20],
 stud_type *sort_students(const stud_type *liste, int (*cmp_students)(stud_type const *t1, stud_type const *t2))
 {
 
-    return
+    return NULL;
 }
 
 static void test_empty(stud_type const *liste)
