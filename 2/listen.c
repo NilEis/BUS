@@ -12,6 +12,12 @@ typedef struct stud_type
     struct stud_type *next;
 } stud_type;
 
+typedef struct stud_list
+{
+    stud_type *stud;
+    struct stud_list *next;
+} stud_list;
+
 /* Ist die Datenbank leer?      */
 bool is_empty(stud_type const *liste)
 {
@@ -48,7 +54,7 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     }
     /* Sortier den Studenten aufsteigend nach Matrikelnummer ein (matrikelnummern sind einzigartig) */
     stud_type *n = *studenten_liste;
-    while (!is_empty(n))
+    while (n->matnum < tmp->matnum && !is_empty(n))
     {
         if (n->matnum < tmp->matnum)
         {
@@ -151,10 +157,56 @@ bool get_student(stud_type const *studenten_liste, int matnum, char vorname[20],
     }
 }
 
-stud_type *sort_students(const stud_type *liste, int (*cmp_students)(stud_type const *t1, stud_type const *t2))
+static int compare_students_first_name(stud_type const *t1, stud_type const *t2)
 {
+    return strcmp(t1->vorname, t2->vorname);
+}
 
-    return NULL;
+static int compare_students_last_name(stud_type const *t1, stud_type const *t2)
+{
+    return strcmp(t1->nachname, t2->nachname);
+}
+
+stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *t1, stud_type const *t2))
+{
+    if (is_empty(liste))
+    {
+        return NULL;
+    }
+    stud_list *l = (stud_list *)calloc(1, sizeof(stud_list));
+    if (l == NULL)
+    {
+        return NULL;
+    }
+    stud_type *tmp = liste;
+    l->stud = tmp;
+    tmp = tmp->next;
+    while (!is_empty(tmp))
+    {
+        stud_list *tmp_l = l;
+        while (tmp_l != NULL)
+        {
+            if (cmp_students(tmp_l->stud, tmp) == 1)
+            {
+                stud_list *t = tmp_l->next;
+                tmp_l->next = (stud_list *)malloc(sizeof(stud_list));
+                tmp_l->next->stud = tmp;
+                tmp_l->next->next = t;
+                goto inserted; // Darf man das so?
+            }
+            tmp_l = tmp_l->next;
+        }
+        if (cmp_students(l->stud, tmp) == -1)
+        {
+            stud_list *t = (stud_list *)calloc(1, sizeof(stud_list));
+            t->next = l;
+            t->stud = tmp;
+            l = t;
+        }
+    inserted:
+        tmp = tmp->next;
+    }
+    return l;
 }
 
 static void test_empty(stud_type const *liste)
@@ -247,18 +299,64 @@ int main(void)
     test_dump(studenten_liste);
 
     {
+        puts("Teste sortierung nach Vornamen:");
         /* Erzeuge sortierte Liste nach Vorname */
+        stud_list *vn = sort_students(studenten_liste, compare_students_first_name);
+        stud_list *tmp = vn;
         /* Gebe Liste aus */
+        {
+            while (tmp != NULL)
+            {
+                printf("    %s %s (%d)\n", tmp->stud->vorname, tmp->stud->nachname, tmp->stud->matnum);
+                tmp = tmp->next;
+            }
+        }
         /* Räume erzeugte Liste auf */
+        {
+            tmp = vn;
+            while (vn != NULL)
+            {
+                tmp = vn;
+                vn = vn->next;
+                free(tmp);
+            }
+        }
     }
 
     {
-        /* Erzeuge sortierte Liste nach Nachname */
+        puts("Teste sortierung nach Nachnamen:");
+        /* Erzeuge sortierte Liste nach Vorname */
+        stud_list *vn = sort_students(studenten_liste, compare_students_last_name);
+        stud_list *tmp = vn;
         /* Gebe Liste aus */
+        {
+            while (tmp != NULL)
+            {
+                printf("    %s %s (%d)\n", tmp->stud->vorname, tmp->stud->nachname, tmp->stud->matnum);
+                tmp = tmp->next;
+            }
+        }
         /* Räume erzeugte Liste auf */
+        {
+            tmp = vn;
+            while (vn != NULL)
+            {
+                tmp = vn;
+                vn = vn->next;
+                free(tmp);
+            }
+        }
     }
 
     /* Räume studenten_liste auf */
-
+    {
+        stud_type *tmp = studenten_liste;
+        while (!is_empty(studenten_liste))
+        {
+            tmp = studenten_liste;
+            studenten_liste = studenten_liste->next;
+            free(tmp);
+        }
+    }
     return 0;
 }
