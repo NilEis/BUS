@@ -38,7 +38,7 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     tmp->matnum = matnum;
     strcpy(tmp->vorname, vorname);
     strcpy(tmp->nachname, nachname);
-    tmp->next = NULL;
+    tmp->next = NULL; 
     /* Füge den neuen Eintrag in die Liste ein */
     /* Ist die Liste leer ? */
     if (is_empty(*studenten_liste))
