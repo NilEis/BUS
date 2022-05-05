@@ -301,6 +301,7 @@ int main(void)
     test_dump(studenten_liste);
 
     {
+        test_enqueue(&studenten_liste, 434188, "N", "E");
         puts("Teste sortierung nach Vornamen:");
         /* Erzeuge sortierte Liste nach Vorname */
         stud_list *vn = sort_students(studenten_liste, compare_students_first_name);
