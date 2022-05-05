@@ -54,20 +54,22 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     }
     /* Sortier den Studenten aufsteigend nach Matrikelnummer ein (matrikelnummern sind einzigartig) */
     stud_type *n = *studenten_liste;
-    while (n->matnum < tmp->matnum && !is_empty(n))
-    {
-        if (n->matnum < tmp->matnum)
-        {
-            tmp->next = n->next;
-            n->next = tmp;
-            return true;
-        }
-        n = n->next;
-    }
-    if ((*studenten_liste)->next->matnum > matnum)
+    stud_type *p = NULL;
+    if ((*studenten_liste)->matnum > matnum)
     {
         tmp->next = *studenten_liste;
         *studenten_liste = tmp;
+        return true;
+    }
+    while (!is_empty(n) && n->matnum < tmp->matnum)
+    {
+        p = n;
+        n = n->next;
+    }
+    if (!is_empty(p) && p->matnum < tmp->matnum)
+    {
+        tmp->next = p->next;
+        p->next = tmp;
         return true;
     }
     free(tmp);
@@ -186,7 +188,7 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
         stud_list *tmp_l = l;
         while (tmp_l != NULL)
         {
-            if (cmp_students(tmp_l->stud, tmp) == 1)
+            if (cmp_students(tmp_l->stud, tmp) != 1)
             {
                 stud_list *t = tmp_l->next;
                 tmp_l->next = (stud_list *)malloc(sizeof(stud_list));
@@ -196,7 +198,7 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
             }
             tmp_l = tmp_l->next;
         }
-        if (cmp_students(l->stud, tmp) == -1)
+        if (cmp_students(l->stud, tmp) == 1)
         {
             stud_list *t = (stud_list *)calloc(1, sizeof(stud_list));
             t->next = l;
