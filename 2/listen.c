@@ -36,6 +36,7 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
 {
     /* Hole dynamischen Speicher für den neuen Listen Eintrag */
     stud_type *tmp = (stud_type *)malloc(sizeof(stud_type));
+    /* Teste ob der Speicher angeforderd werden konnte */
     if (tmp == NULL)
     {
         return false;
@@ -47,6 +48,7 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     tmp->next = NULL;
     /* Füge den neuen Eintrag in die Liste ein */
     /* Ist die Liste leer ? */
+    /* Ist die Liste leer, wird der neue Student als Liste gesetzt */
     if (is_empty(*studenten_liste))
     {
         *studenten_liste = tmp;
@@ -55,23 +57,27 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     /* Sortier den Studenten aufsteigend nach Matrikelnummer ein (matrikelnummern sind einzigartig) */
     stud_type *n = *studenten_liste;
     stud_type *p = NULL;
+    /* Sollte das erste Element größer als das einzufügende sein, wird das Einzufügende als erstes eingefügt */
     if ((*studenten_liste)->matnum > matnum)
     {
         tmp->next = *studenten_liste;
         *studenten_liste = tmp;
         return true;
     }
+    /* Es wird so lange die liste durch gegangen, bis das Elemet eingefügt werden kann, oder sie leer ist */
     while (!is_empty(n) && n->matnum < tmp->matnum)
     {
         p = n;
         n = n->next;
     }
+    /* Sollte das Element gültig sein, wird es eingefügt */
     if (!is_empty(p) && p->matnum < tmp->matnum)
     {
         tmp->next = p->next;
         p->next = tmp;
         return true;
     }
+    /* Sollte das Element ungültig sein, wird der Speicher wieder frei gegeben */
     free(tmp);
     return false;
 }
@@ -307,22 +313,18 @@ int main(void)
         stud_list *vn = sort_students(studenten_liste, compare_students_first_name);
         stud_list *tmp = vn;
         /* Gebe Liste aus */
+        while (tmp != NULL)
         {
-            while (tmp != NULL)
-            {
-                printf("    %s %s (%d)\n", tmp->stud->vorname, tmp->stud->nachname, tmp->stud->matnum);
-                tmp = tmp->next;
-            }
+            printf("    %s %s (%d)\n", tmp->stud->vorname, tmp->stud->nachname, tmp->stud->matnum);
+            tmp = tmp->next;
         }
         /* Räume erzeugte Liste auf */
+        tmp = vn;
+        while (vn != NULL)
         {
             tmp = vn;
-            while (vn != NULL)
-            {
-                tmp = vn;
-                vn = vn->next;
-                free(tmp);
-            }
+            vn = vn->next;
+            free(tmp);
         }
     }
 
