@@ -27,26 +27,26 @@ bool is_empty(stud_type const *liste)
 /* Einfuegen eines Elementes
  *
  * Bekommt einen Zeiger auf einen Zeiger der auf das 1. Element der Liste zeigt
- * Bekommt MatNr, Vorname und Nachname des Studenten der eingefügt werden soll
+ * Bekommt MatNr, Vorname und Nachname des Studenten der eingefuegt werden soll
  *
- * Gibt true für Erfolg zurück
- * Gibt false für einen Fehler zurück
+ * Gibt true fuer Erfolg zurueck
+ * Gibt false fuer einen Fehler zurueck
  */
 bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], char const nachname[20])
 {
-    /* Hole dynamischen Speicher für den neuen Listen Eintrag */
+    /* Hole dynamischen Speicher fuer den neuen Listen Eintrag */
     stud_type *tmp = (stud_type *)malloc(sizeof(stud_type));
     /* Teste ob der Speicher angeforderd werden konnte */
     if (tmp == NULL)
     {
         return false;
     }
-    /* Befülle den Speicher (vorsicht vor buffer overflows!) */
+    /* Befuelle den Speicher (vorsicht vor buffer overflows!) */
     tmp->matnum = matnum;
     strcpy(tmp->vorname, vorname);
     strcpy(tmp->nachname, nachname);
     tmp->next = NULL;
-    /* Füge den neuen Eintrag in die Liste ein */
+    /* Fuege den neuen Eintrag in die Liste ein */
     /* Ist die Liste leer ? */
     /* Ist die Liste leer, wird der neue Student als Liste gesetzt */
     if (is_empty(*studenten_liste))
@@ -57,51 +57,51 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     /* Sortier den Studenten aufsteigend nach Matrikelnummer ein (matrikelnummern sind einzigartig) */
     stud_type *n = *studenten_liste;
     stud_type *p = NULL;
-    /* Sollte das erste Element größer als das einzufügende sein, wird das Einzufügende als erstes eingefügt */
+    /* Sollte das erste Element groesser als das einzufuegende sein, wird das Einzufuegende als erstes eingefuegt */
     if ((*studenten_liste)->matnum > matnum)
     {
         tmp->next = *studenten_liste;
         *studenten_liste = tmp;
         return true;
     }
-    /* Es wird so lange die liste durch gegangen, bis das Elemet eingefügt werden kann, oder sie leer ist */
+    /* Es wird so lange die liste durch gegangen, bis das Elemet eingefuegt werden kann, oder sie leer ist */
     while (!is_empty(n) && n->matnum < tmp->matnum)
     {
         p = n;
         n = n->next;
     }
-    /* Sollte das Element gültig sein, wird es eingefügt */
+    /* Sollte das Element gueltig sein, wird es eingefuegt */
     if (!is_empty(p) && p->matnum < tmp->matnum)
     {
         tmp->next = p->next;
         p->next = tmp;
         return true;
     }
-    /* Sollte das Element ungültig sein, wird der Speicher wieder frei gegeben */
+    /* Sollte das Element ungueltig sein, wird der Speicher wieder frei gegeben */
     free(tmp);
     return false;
 }
 
-/* Löschen eines Elementes.
+/* Loeschen eines Elementes.
  *
  * Bekommt einen Zeiger auf einen Zeiger der auf das 1. Element der Liste zeigt
- * Bekommt die MatNr des Studenten der zu löschen ist
+ * Bekommt die MatNr des Studenten der zu loeschen ist
  *
- * Gibt true für Erfolg zurück
- * Gibt false für einen Fehler zurück
+ * Gibt true fuer Erfolg zurueck
+ * Gibt false fuer einen Fehler zurueck
  */
 bool dequeue(stud_type **studenten_liste, int matnum)
 {
     stud_type *n = *studenten_liste;
     stud_type *p = NULL;
     bool gefunden = false;
-    /* Prüfe Randbedingungen */
+    /* Pruefe Randbedingungen */
     if (is_empty(*studenten_liste))
     {
         return false;
     }
     /* Finde den Studenten */
-    /* Was muss passieren wenn das 1. Element gelöscht wird? */
+    /* Was muss passieren wenn das 1. Element geloescht wird? */
     /* Das Element wird als neues Startelement eingesetzt */
     if ((*studenten_liste)->matnum == matnum)
     {
@@ -124,14 +124,14 @@ bool dequeue(stud_type **studenten_liste, int matnum)
             n = n->next;
         }
     }
-    /* Lösche den Studenten und gibt den Speicher frei */
+    /* Loesche den Studenten und gibt den Speicher frei */
     if (gefunden)
     {
         free(p);
         return true;
     }
     /* Was ist wenn es nicht in der Liste ist? */
-    /* Sollte es nicht in der Liste sein, wird nichts gelöscht und es wird false zurück gegeben */
+    /* Sollte es nicht in der Liste sein, wird nichts geloescht und es wird false zurueck gegeben */
     return false;
     /* ... */
 }
@@ -154,7 +154,7 @@ bool get_student(stud_type const *studenten_liste, int matnum, char vorname[20],
 
     if (!curr || curr->matnum != matnum)
     {
-        /* Rückgabewert: Fehler */
+        /* Rueckgabewert: Fehler */
         return false;
     }
     else
@@ -163,7 +163,7 @@ bool get_student(stud_type const *studenten_liste, int matnum, char vorname[20],
         vorname[19] = '\0';
         strncpy(nachname, curr->nachname, 19);
         nachname[19] = '\0';
-        /* Rückgabewert: OK */
+        /* Rueckgabewert: OK */
         return true;
     }
 }
@@ -191,26 +191,26 @@ static int compare_students_last_name(stud_type const *t1, stud_type const *t2)
 }
 
 /**
- * @brief Gibt eine sortiere Liste des types stud_list zurück die, der Reihenfolge entsprechend, auf die Studenten zeigt
+ * @brief Gibt eine sortiere Liste des types stud_list zurueck die, der Reihenfolge entsprechend, auf die Studenten zeigt
  * @param liste ist ein Pointer auf die, zu sortierende Liste
  * @param cmp_students ist einf Funktionspointer auf eine Funktionen die je zwei stud_types vergleicht
- * @return Es wird eine sortierte Liste zurückgegeben oder NULL, wenn ein Fehler auftritt
+ * @return Es wird eine sortierte Liste zurueckgegeben oder NULL, wenn ein Fehler auftritt
  */
 stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *t1, stud_type const *t2))
 {
-    /* Wenn die Liste leer ist wird NULL zurück gegeben */
+    /* Wenn die Liste leer ist wird NULL zurueck gegeben */
     if (is_empty(liste))
     {
         return NULL;
     }
-    /* Andernfalls wird Speicher für angefordert und auf NULL gesetzt */
+    /* Andernfalls wird Speicher fuer angefordert und auf NULL gesetzt */
     stud_list *l = (stud_list *)calloc(1, sizeof(stud_list));
-    /* Sollte kein Speicher angefordert werden können wird NULL zurückgegeben */
+    /* Sollte kein Speicher angefordert werden koennen wird NULL zurueckgegeben */
     if (l == NULL)
     {
         return NULL;
     }
-    /* Im folgenden wird die Liste durchiteriert und die Studenten werden sortiert als Verweise in die stud_list Liste eingefügt */
+    /* Im folgenden wird die Liste durchiteriert und die Studenten werden sortiert als Verweise in die stud_list Liste eingefuegt */
     stud_type *tmp = liste;
     l->stud = tmp;
     tmp = tmp->next;
@@ -227,13 +227,13 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
                 tmp_l->next->next = t;
                 goto inserted;
                 /* Da durch das goto der Programmablauf, unserer Meinung nach, in diesem Fall klarer zu verstehen ist
-                und mehrere if-Bedingungen oder ein break und eine Ergänzung in der folgenden if-Bedingung vermieden werden,
+                und mehrere if-Bedingungen oder ein break und eine Ergaenzung in der folgenden if-Bedingung vermieden werden,
                 nutzen wir es hier.
-                Wäre dies eine akzeptable Nutzung oder wäre die oben erwähnte Alternative besser? */
+                Waere dies eine akzeptable Nutzung oder waere die oben erwaehnte Alternative besser? */
             }
             tmp_l = tmp_l->next;
         }
-        /* Sollte der einzufügende Student an den Anfang  gehören wird er hier eingefügt */
+        /* Sollte der einzufuegende Student an den Anfang  gehoeren wird er hier eingefuegt */
         if (cmp_students(l->stud, tmp) == 1)
         {
             stud_list *t = (stud_list *)calloc(1, sizeof(stud_list));
@@ -244,7 +244,7 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
     inserted:
         tmp = tmp->next;
     }
-    /* Gebe die sortierte Liste zurück */
+    /* Gebe die sortierte Liste zurueck */
     return l;
 }
 
@@ -283,11 +283,11 @@ static void test_enqueue(stud_type **liste, int matnum, char const *vorname, cha
     printf(">>> Fuege neuen Studenten in die Liste ein: %s %s [%4i] ...\n", vorname, nachname, matnum);
     if (enqueue(liste, matnum, vorname, nachname))
     {
-        printf("    Matrikelnummer %4i eingefügt\n", matnum);
+        printf("    Matrikelnummer %4i eingefuegt\n", matnum);
     }
     else
     {
-        printf("    Matrikelnummer %4i konnte nicht eingefügt werden\n", matnum);
+        printf("    Matrikelnummer %4i konnte nicht eingefuegt werden\n", matnum);
     }
 }
 
@@ -351,7 +351,7 @@ int main(void)
             printf("    %s %s (%d)\n", tmp->stud->vorname, tmp->stud->nachname, tmp->stud->matnum);
             tmp = tmp->next;
         }
-        /* Räume erzeugte Liste auf */
+        /* Raeume erzeugte Liste auf */
         tmp = vn;
         while (vn != NULL)
         {
@@ -374,7 +374,7 @@ int main(void)
                 tmp = tmp->next;
             }
         }
-        /* Räume erzeugte Liste auf */
+        /* Raeume erzeugte Liste auf */
         {
             tmp = vn;
             while (vn != NULL)
@@ -386,7 +386,7 @@ int main(void)
         }
     }
 
-    /* Räume studenten_liste auf */
+    /* Raeume studenten_liste auf */
     {
         stud_type *tmp = studenten_liste;
         while (!is_empty(studenten_liste))
