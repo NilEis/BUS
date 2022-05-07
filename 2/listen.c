@@ -102,6 +102,7 @@ bool dequeue(stud_type **studenten_liste, int matnum)
     }
     /* Finde den Studenten */
     /* Was muss passieren wenn das 1. Element gelöscht wird? */
+    /* Das Element wird als neues Startelement eingesetzt */
     if ((*studenten_liste)->matnum == matnum)
     {
         *studenten_liste = (*studenten_liste)->next;
@@ -110,6 +111,7 @@ bool dequeue(stud_type **studenten_liste, int matnum)
     }
     else
     {
+        /* Andernfalls wird die Liste durchsucht, bis dass Objekt gefunden wurde oder das Ende erreicht wurde */
         while (n->next != NULL)
         {
             if (n->next->matnum == matnum)
@@ -122,13 +124,14 @@ bool dequeue(stud_type **studenten_liste, int matnum)
             n = n->next;
         }
     }
-    /* Was ist wenn es nicht in der Liste ist? */
     /* Lösche den Studenten und gibt den Speicher frei */
     if (gefunden)
     {
         free(p);
         return true;
     }
+    /* Was ist wenn es nicht in der Liste ist? */
+    /* Sollte es nicht in der Liste sein, wird nichts gelöscht und es wird false zurück gegeben */
     return false;
     /* ... */
 }
@@ -165,27 +168,49 @@ bool get_student(stud_type const *studenten_liste, int matnum, char vorname[20],
     }
 }
 
+/**
+ * @brief Vergleicht die Vornamen der Studenten
+ * @param t1 ist ein Pointer auf den ersten Studierenden
+ * @param t2 ist ein Pointer auf den ersten Studierenden
+ * @return -1 wenn t1 < t2, 0 wenn t1 == t2 und 1 wenn t1 > t2
+ */
 static int compare_students_first_name(stud_type const *t1, stud_type const *t2)
 {
     return strcmp(t1->vorname, t2->vorname);
 }
 
+/**
+ * @brief Vergleicht die Nachnamen der Studenten
+ * @param t1 ist ein Pointer auf den ersten Studierenden
+ * @param t2 ist ein Pointer auf den ersten Studierenden
+ * @return -1 wenn t1 < t2, 0 wenn t1 == t2 und 1 wenn t1 > t2
+ */
 static int compare_students_last_name(stud_type const *t1, stud_type const *t2)
 {
     return strcmp(t1->nachname, t2->nachname);
 }
 
+/**
+ * @brief Gibt eine sortiere Liste des types stud_list zurück die, der Reihenfolge entsprechend, auf die Studenten zeigt
+ * @param liste ist ein Pointer auf die, zu sortierende Liste
+ * @param cmp_students ist einf Funktionspointer auf eine Funktionen die je zwei stud_types vergleicht
+ * @return Es wird eine sortierte Liste zurückgegeben oder NULL, wenn ein Fehler auftritt
+ */
 stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *t1, stud_type const *t2))
 {
+    /* Wenn die Liste leer ist wird NULL zurück gegeben */
     if (is_empty(liste))
     {
         return NULL;
     }
+    /* Andernfalls wird Speicher für angefordert und auf NULL gesetzt */
     stud_list *l = (stud_list *)calloc(1, sizeof(stud_list));
+    /* Sollte kein Speicher angefordert werden können wird NULL zurückgegeben */
     if (l == NULL)
     {
         return NULL;
     }
+    /* Im folgenden wird die Liste durchiteriert und die Studenten werden sortiert als Verweise in die stud_list Liste eingefügt */
     stud_type *tmp = liste;
     l->stud = tmp;
     tmp = tmp->next;
@@ -200,10 +225,15 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
                 tmp_l->next = (stud_list *)malloc(sizeof(stud_list));
                 tmp_l->next->stud = tmp;
                 tmp_l->next->next = t;
-                goto inserted; // Darf man das so?
+                goto inserted;
+                /* Da durch das goto der Programmablauf, unserer Meinung nach, in diesem Fall klarer zu verstehen ist
+                und mehrere if-Bedingungen oder ein break und eine Ergänzung in der folgenden if-Bedingung vermieden werden,
+                nutzen wir es hier.
+                Wäre dies eine akzeptable Nutzung oder wäre die oben erwähnte Alternative besser? */
             }
             tmp_l = tmp_l->next;
         }
+        /* Sollte der einzufügende Student an den Anfang  gehören wird er hier eingefügt */
         if (cmp_students(l->stud, tmp) == 1)
         {
             stud_list *t = (stud_list *)calloc(1, sizeof(stud_list));
@@ -214,6 +244,7 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
     inserted:
         tmp = tmp->next;
     }
+    /* Gebe die sortierte Liste zurück */
     return l;
 }
 
@@ -307,6 +338,8 @@ int main(void)
     test_dump(studenten_liste);
 
     {
+        test_enqueue(&studenten_liste, 434702, "E", "L");
+        test_enqueue(&studenten_liste, 434139, "T", "R");
         test_enqueue(&studenten_liste, 434188, "N", "E");
         puts("Teste sortierung nach Vornamen:");
         /* Erzeuge sortierte Liste nach Vorname */
