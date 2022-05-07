@@ -57,14 +57,16 @@ bool enqueue(stud_type **studenten_liste, int matnum, char const vorname[20], ch
     /* Sortier den Studenten aufsteigend nach Matrikelnummer ein (matrikelnummern sind einzigartig) */
     stud_type *n = *studenten_liste;
     stud_type *p = NULL;
-    /* Sollte das erste Element groesser als das einzufuegende sein, wird das Einzufuegende als erstes eingefuegt */
+    /* Sollte das erste Element groesser als das einzufuegende sein,
+       wird das Einzufuegende als erstes eingefuegt */
     if ((*studenten_liste)->matnum > matnum)
     {
         tmp->next = *studenten_liste;
         *studenten_liste = tmp;
         return true;
     }
-    /* Es wird so lange die liste durch gegangen, bis das Elemet eingefuegt werden kann, oder sie leer ist */
+    /* Es wird so lange die liste durch gegangen, bis das Elemet eingefuegt werden kann,
+       oder sie leer ist */
     while (!is_empty(n) && n->matnum < tmp->matnum)
     {
         p = n;
@@ -111,7 +113,8 @@ bool dequeue(stud_type **studenten_liste, int matnum)
     }
     else
     {
-        /* Andernfalls wird die Liste durchsucht, bis dass Objekt gefunden wurde oder das Ende erreicht wurde */
+        /* Andernfalls wird die Liste durchsucht, 
+           bis dass Objekt gefunden wurde oder das Ende erreicht wurde */
         while (n->next != NULL)
         {
             if (n->next->matnum == matnum)
@@ -131,7 +134,8 @@ bool dequeue(stud_type **studenten_liste, int matnum)
         return true;
     }
     /* Was ist wenn es nicht in der Liste ist? */
-    /* Sollte es nicht in der Liste sein, wird nichts geloescht und es wird false zurueck gegeben */
+    /* Sollte es nicht in der Liste sein, wird nichts geloescht
+       und es wird false zurueck gegeben */
     return false;
     /* ... */
 }
@@ -210,7 +214,8 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
     {
         return NULL;
     }
-    /* Im folgenden wird die Liste durchiteriert und die Studenten werden sortiert als Verweise in die stud_list Liste eingefuegt */
+    /* Im folgenden wird die Liste durchiteriert
+       und die Studenten werden sortiert als Verweise in die stud_list Liste eingefuegt */
     stud_type *tmp = liste;
     l->stud = tmp;
     tmp = tmp->next;
@@ -226,10 +231,12 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
                 tmp_l->next->stud = tmp;
                 tmp_l->next->next = t;
                 goto inserted;
-                /* Da durch das goto der Programmablauf, unserer Meinung nach, in diesem Fall klarer zu verstehen ist
-                und mehrere if-Bedingungen oder ein break und eine Ergaenzung in der folgenden if-Bedingung vermieden werden,
-                nutzen wir es hier.
-                Waere dies eine akzeptable Nutzung oder waere die oben erwaehnte Alternative besser? */
+                /* Da durch das goto der Programmablauf, unserer Meinung nach, 
+                   in diesem Fall klarer zu verstehen ist
+                   und mehrere if-Bedingungen oder
+                   ein break und eine Ergaenzung in der folgenden if-Bedingung vermieden werden,
+                   nutzen wir es hier.
+                   Waere dies eine akzeptable Nutzung oder waere die oben erwaehnte Alternative besser? */
             }
             tmp_l = tmp_l->next;
         }
