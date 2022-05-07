@@ -222,24 +222,6 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
     while (!is_empty(tmp))
     {
         stud_list *tmp_l = l;
-        while (tmp_l != NULL)
-        {
-            if (cmp_students(tmp_l->stud, tmp) != 1)
-            {
-                stud_list *t = tmp_l->next;
-                tmp_l->next = (stud_list *)malloc(sizeof(stud_list));
-                tmp_l->next->stud = tmp;
-                tmp_l->next->next = t;
-                goto inserted;
-                /* Da durch das goto der Programmablauf, unserer Meinung nach, 
-                   in diesem Fall klarer zu verstehen ist
-                   und mehrere if-Bedingungen oder
-                   ein break und eine Ergaenzung in der folgenden if-Bedingung vermieden werden,
-                   nutzen wir es hier.
-                   Waere dies eine akzeptable Nutzung oder waere die oben erwaehnte Alternative besser? */
-            }
-            tmp_l = tmp_l->next;
-        }
         /* Sollte der einzufuegende Student an den Anfang  gehoeren wird er hier eingefuegt */
         if (cmp_students(l->stud, tmp) == 1)
         {
@@ -248,7 +230,18 @@ stud_list *sort_students(stud_type *liste, int (*cmp_students)(stud_type const *
             t->stud = tmp;
             l = t;
         }
-    inserted:
+        while (tmp_l != NULL)
+        {
+            if (cmp_students(tmp_l->stud, tmp) != 1)
+            {
+                stud_list *t = tmp_l->next;
+                tmp_l->next = (stud_list *)malloc(sizeof(stud_list));
+                tmp_l->next->stud = tmp;
+                tmp_l->next->next = t;
+                break;
+            }
+            tmp_l = tmp_l->next;
+        }
         tmp = tmp->next;
     }
     /* Gebe die sortierte Liste zurueck */
@@ -345,9 +338,6 @@ int main(void)
     test_dump(studenten_liste);
 
     {
-        test_enqueue(&studenten_liste, 434702, "E", "L");
-        test_enqueue(&studenten_liste, 434139, "T", "R");
-        test_enqueue(&studenten_liste, 434188, "N", "E");
         puts("Teste sortierung nach Vornamen:");
         /* Erzeuge sortierte Liste nach Vorname */
         stud_list *vn = sort_students(studenten_liste, compare_students_first_name);
