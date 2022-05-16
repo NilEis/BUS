@@ -146,13 +146,17 @@ void freeMatrix(Matrix *m)
 bool multiplyindex(Matrix *a, Matrix *b, Matrix *c, size_t x, size_t y)
 {
 	int v = 0;
-	if (y > a->ncols || x > b->nrows || x < 0 || y < 0 || b->nrows != a->ncols)
+	if (y > a->ncols || x > b->nrows)
 	{
 		return false;
 	}
-	for (int i = 0; i < c->ncols; i++)
+	printf("w: %lu\nh: %lu\n", c->ncols, c->nrows);
+	printMatrix(a);
+	printMatrix(b);
+	printMatrix(c);
+	for (size_t i = 0; i < c->ncols; i++)
 	{
-		printf("i: %ld\n---------\n", i);
+		printf("i: %lu\n---------\n", i);
 		v += a->array[i][y] * b->array[x][i];
 	}
 	c->array[x][y] = v;
@@ -225,15 +229,15 @@ bool multiply(Matrix *a, Matrix *b, Matrix *c, int numthreads)
 	// dem Ergebnis der Multiplikation gefüllt werden kann.
 	// TODO
 	//
-	c->nrows = a->ncols;
-	c->ncols = a->ncols;
-	c->array = (int **)calloc(c->ncols, sizeof(int *));
+	c->nrows = a->nrows;
+	c->ncols = b->ncols;
+	c->array = (int **)calloc(c->ncols, sizeof(c->array));
 	assert(c->array != NULL);
-	for (int i = 0; i < c->ncols; i++)
+	for (size_t i = 0; i < c->ncols; i++)
 	{
-		c->array[i] = (int *)calloc(c->nrows, sizeof(int));
+		c->array[i] = (int *)calloc(c->nrows, sizeof(*(c->array[0])));
 	}
-	printMatrix(c);
+	printf("size: %lux%lu\n", (c->ncols), (c->nrows));
 	bool res;
 	if (numthreads == 0)
 		res = singlethreaded_multiply(a, b, c);
