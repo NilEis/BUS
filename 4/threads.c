@@ -29,9 +29,9 @@ typedef struct ThreadArg
 	size_t max_index;
 	// Da weder der Pointer noch die Matrix veraendert werden sollen werden a und b als konstante Pointer
 	// zu Konstanten Matrizen uebergeben.
-	const Matrix *a;
-	const Matrix *b;
-	volatile Matrix *c;
+	Matrix *a;
+	Matrix *b;
+	Matrix *c;
 	bool success;
 } ThreadArg;
 
@@ -239,6 +239,17 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 		}
 		else
 		{
+			size_t part = max / (numthreads - 1);
+			for (int i = 0; i < numthreads; i++)
+			{
+				threadargs[i].a = a;
+				threadargs[i].b = b;
+				threadargs[i].c = c;
+				threadargs[i].start_index = i * part;
+				threadargs[i].end_index = i * part + part;
+				threadargs[i].max_index = max;
+				threadargs[i].success = false;
+			}
 		}
 	}
 	else
