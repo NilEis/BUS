@@ -1,1 +1,2 @@
-bash run.sh
+@echo off
+bash ./run.sh

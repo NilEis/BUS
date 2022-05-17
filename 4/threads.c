@@ -23,6 +23,15 @@ typedef struct ThreadArg
 	// ob er die Multiplikation erfolgreich durchgeführt
 	// hat.
 	// TODO
+	// start_index und end_index werden als Grenzen übergeben um dem Thread mitzuteilen welche Zellen berechnet werden sollen
+	size_t start_index;
+	size_t end_index;
+	size_t max_index;
+	// Da weder der Pointer noch die Matrix veraendert werden sollen werden a und b als konstante Pointer
+	// zu Konstanten Matrizen uebergeben.
+	const Matrix *a;
+	const Matrix *b;
+	volatile Matrix *c;
 	bool success;
 } ThreadArg;
 
@@ -160,14 +169,15 @@ bool multiplyindex(Matrix *a, Matrix *b, Matrix *c, size_t x, size_t y)
 
 bool singlethreaded_multiply(Matrix *a, Matrix *b, Matrix *c)
 {
-	for (size_t x = 0; x < c->ncols; x++)
+	bool res = false;
+	for (size_t y = 0; y < c->nrows; y++)
 	{
-		for (size_t y = 0; y < c->nrows; y++)
+		for (size_t x = 0; x < c->ncols; x++)
 		{
-			multiplyindex(a, b, c, x, y);
+			res = multiplyindex(a, b, c, x, y);
 		}
 	}
-	return true;
+	return res;
 }
 
 // Dies ist die Hauptfunktion eines Threads:
@@ -180,6 +190,22 @@ void *thread_routine(void *threadarg_voidp)
 	// für die dieser Thread zuständig ist unter Zuhilfenahme
 	// der Funktion mutiplyindex
 	// TODO
+	size_t x;
+	size_t y;
+	for (size_t i = threadarg->start_index; i < threadarg->end_index; i++)
+	{
+		if (i >= threadarg->max_index)
+		{
+			return threadarg;
+		}
+		y = i / threadarg->c->ncols;
+		x = (i % threadarg->c->nrows) - 1;
+		threadarg->success = multiplyindex(threadarg->a, threadarg->b, threadarg->c, x, y);
+		if (!threadarg->success)
+		{
+			return threadarg;
+		}
+	}
 	return threadarg;
 }
 
@@ -194,6 +220,40 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 
 	// Füllen Sie die Elemente des threadargs Array mit den notwendigen Daten
 	// TODO
+	size_t max = c->nrows * c->ncols;
+	if (max >= numthreads)
+	{
+		if (c->nrows % numthreads == 0)
+		{
+			size_t part = max / numthreads;
+			for (int i = 0; i < numthreads; i++)
+			{
+				threadargs[i].a = a;
+				threadargs[i].b = b;
+				threadargs[i].c = c;
+				threadargs[i].start_index = i * part;
+				threadargs[i].end_index = i * part + part;
+				threadargs[i].max_index = max;
+				threadargs[i].success = false;
+			}
+		}
+		else
+		{
+		}
+	}
+	else
+	{
+		for (int i = 0; i < numthreads; i++)
+		{
+			threadargs[i].a = a;
+			threadargs[i].b = b;
+			threadargs[i].c = c;
+			threadargs[i].start_index = i;
+			threadargs[i].end_index = i + 1;
+			threadargs[i].max_index = max;
+			threadargs[i].success = false;
+		}
+	}
 
 	// Erstellen Sie anschließend die Worker-Threads mittels der Funktion
 	// pthread_create. (Man-Page lesen!)
@@ -227,10 +287,17 @@ bool multiply(Matrix *a, Matrix *b, Matrix *c, int numthreads)
 	c->nrows = a->nrows;
 	c->ncols = b->ncols;
 	c->array = (int **)calloc(c->nrows, sizeof(int *));
-	assert(c->array != NULL);
+	if (c->array == NULL)
+	{
+		return false;
+	}
 	for (size_t i = 0; i < c->nrows; i++)
 	{
 		c->array[i] = (int *)calloc(c->ncols, sizeof(int));
+		if (c->array[i] == NULL)
+		{
+			return false;
+		}
 	}
 	bool res;
 	if (numthreads == 0)
