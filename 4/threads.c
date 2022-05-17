@@ -199,7 +199,7 @@ void *thread_routine(void *threadarg_voidp)
 			return threadarg;
 		}
 		y = i / threadarg->c->ncols;
-		x = (i % threadarg->c->nrows) - 1;
+		x = i - (y * threadarg->c->ncols);
 		threadarg->success = multiplyindex(threadarg->a, threadarg->b, threadarg->c, x, y);
 		if (!threadarg->success)
 		{
@@ -223,38 +223,29 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	size_t max = c->nrows * c->ncols;
 	if (max >= numthreads)
 	{
+		size_t part = 0;
 		if (c->nrows % numthreads == 0)
 		{
-			size_t part = max / numthreads;
-			for (int i = 0; i < numthreads; i++)
-			{
-				threadargs[i].a = a;
-				threadargs[i].b = b;
-				threadargs[i].c = c;
-				threadargs[i].start_index = i * part;
-				threadargs[i].end_index = i * part + part;
-				threadargs[i].max_index = max;
-				threadargs[i].success = false;
-			}
+			part = max / numthreads;
 		}
 		else
 		{
-			size_t part = max / (numthreads - 1);
-			for (int i = 0; i < numthreads; i++)
-			{
-				threadargs[i].a = a;
-				threadargs[i].b = b;
-				threadargs[i].c = c;
-				threadargs[i].start_index = i * part;
-				threadargs[i].end_index = i * part + part;
-				threadargs[i].max_index = max;
-				threadargs[i].success = false;
-			}
+			part = max / (numthreads - 1);
+		}
+		for (unsigned int i = 0; i < numthreads; i++)
+		{
+			threadargs[i].a = a;
+			threadargs[i].b = b;
+			threadargs[i].c = c;
+			threadargs[i].start_index = i * part;
+			threadargs[i].end_index = i * part + part;
+			threadargs[i].max_index = max;
+			threadargs[i].success = false;
 		}
 	}
 	else
 	{
-		for (int i = 0; i < numthreads; i++)
+		for (unsigned int i = 0; i < numthreads; i++)
 		{
 			threadargs[i].a = a;
 			threadargs[i].b = b;
@@ -270,6 +261,18 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	// pthread_create. (Man-Page lesen!)
 	// Es sollen genau numthreads Worker-Threads erstellt werden.
 	// TODO
+	for (unsigned int i = 0; i < numthreads; i++)
+	{
+		if (pthread_create(&tinfo[i], NULL, thread_routine, (void *)&threadargs[i]) != 0)
+		{
+			i--;
+			while (i < numthreads)
+			{
+				pthread_cancel(tinfo[i]);
+			}
+			return false;
+		}
+	}
 
 	void *res_voidp = NULL;
 	// Warten Sie nun der Reihe nach auf die Threads mit Hilfe
@@ -277,12 +280,20 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	// Sie müssen der Funktion einen Pointer auf einen void-Pointer
 	// übergeben. Sie können dazu den res_voidp nutzen.
 	// TODO
-	ThreadArg *res = (ThreadArg *)res_voidp;
-	// Da uns wir von unseren Threads einen ThreadArg-Pointer
-	// zurückbekommen, können wir den erhaltenen void-Pointer in einen
-	// ebensolchen casten. Überprüfen Sie, ob der Thread erfolreich
-	// war.
-	// TODO
+	for (unsigned int i = 0; i < numthreads; i++)
+	{
+		pthread_join(tinfo[i], &res_voidp);
+		ThreadArg *res = (ThreadArg *)res_voidp;
+		// Da uns wir von unseren Threads einen ThreadArg-Pointer
+		// zurückbekommen, können wir den erhaltenen void-Pointer in einen
+		// ebensolchen casten. Überprüfen Sie, ob der Thread erfolreich
+		// war.
+		// TODO
+		if (!res->success)
+		{
+			return false;
+		}
+	}
 	return true;
 }
 
