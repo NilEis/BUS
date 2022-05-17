@@ -150,16 +150,11 @@ bool multiplyindex(Matrix *a, Matrix *b, Matrix *c, size_t x, size_t y)
 	{
 		return false;
 	}
-	printf("w: %lu\nh: %lu\n", c->ncols, c->nrows);
-	printMatrix(a);
-	printMatrix(b);
-	printMatrix(c);
-	for (size_t i = 0; i < c->ncols; i++)
+	for (size_t i = 0; i < a->ncols; i++)
 	{
-		printf("i: %lu\n---------\n", i);
-		v += a->array[i][y] * b->array[x][i];
+		v += a->array[y][i] * b->array[i][x];
 	}
-	c->array[x][y] = v;
+	c->array[y][x] = v;
 	return true;
 }
 
@@ -231,13 +226,12 @@ bool multiply(Matrix *a, Matrix *b, Matrix *c, int numthreads)
 	//
 	c->nrows = a->nrows;
 	c->ncols = b->ncols;
-	c->array = (int **)calloc(c->ncols, sizeof(c->array));
+	c->array = (int **)calloc(c->nrows, sizeof(int *));
 	assert(c->array != NULL);
-	for (size_t i = 0; i < c->ncols; i++)
+	for (size_t i = 0; i < c->nrows; i++)
 	{
-		c->array[i] = (int *)calloc(c->nrows, sizeof(*(c->array[0])));
+		c->array[i] = (int *)calloc(c->ncols, sizeof(int));
 	}
-	printf("size: %lux%lu\n", (c->ncols), (c->nrows));
 	bool res;
 	if (numthreads == 0)
 		res = singlethreaded_multiply(a, b, c);
