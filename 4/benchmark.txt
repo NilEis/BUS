@@ -1,8 +1,8 @@
 Konvertiert werden, kann die Ausgabe mit dem folgenden Code:
 ```js
-const t = "0\n7.653\n1\n7.967\n2\n7.980\n3\n8.189\n4\n8.137\n6\n8.553\n8\n9.522\n12\n9.042\n16\n9.369\n24\n10.464\n32\n10.520";
+let t = "0\n7.653\n1\n7.967\n2\n7.980\n3\n8.189\n4\n8.137\n6\n8.553\n8\n9.522\n12\n9.042\n16\n9.369\n24\n10.464\n32\n10.520";
 let o = "";
-const t_s = t.split("\n");
+let t_s = t.split("\n");
 for(let i = 0; i < t_s.length; i+=2)
 {
 	o += "("+t_s[i]+", "+((t_s[i+1]/500.0)*1000).toFixed(2)+") ";
@@ -12,7 +12,28 @@ for(let i = 0; i < t_s.length; i+=2)
 big ITER=1000
 -------------------------------------------------------------------------
 # Intel(R) Core(TM) i5-7300H (4-Kerne, 2.5GHz, kein Hyper-Threading)
-
+0
+67.934
+1
+69.333
+2
+63.076
+3
+57.874
+4
+60.866
+6
+56.667
+8
+61.381
+12
+61.713
+16
+62.976
+24
+67.523
+32
+70.809
 # AMD Ryzen 5 5500U (6-Kerne, 2.096 GHz, Hyper-Threading)
 0
 40.974
@@ -40,7 +61,28 @@ big ITER=1000
 Small ITER=2000
 -------------------------------------------------------------------------
 # Intel(R) Core(TM) i5-7300H (4-Kerne, 2.5GHz, kein Hyper-Threading)
-
+0
+92.481
+1
+93.633
+2
+95.299
+3
+96.102
+4
+96.786
+6
+99.541
+8
+100.489
+12
+103.748
+16
+107.515
+24
+114.967
+32
+121.928
 # AMD Ryzen 5 5500U (6-Kerne, 2.096 GHz, Hyper-Threading)
 0
 37.929
