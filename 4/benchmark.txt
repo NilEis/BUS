@@ -1,0 +1,24 @@
+# Intel(R) Core(TM) i5-7300H (4-Kerne, 2.5GHz, kein Hyper-Threading)
+Singlethreaded:
+34.594
+Multithreaded:
+1
+37.864
+2
+36.595
+3
+30.737
+4
+47.498
+6
+30.703
+8
+30.725
+12
+32.605
+16
+34.701
+24
+36.605
+32
+36.577
