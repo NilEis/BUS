@@ -169,15 +169,17 @@ bool multiplyindex(Matrix *a, Matrix *b, Matrix *c, size_t x, size_t y)
 
 bool singlethreaded_multiply(Matrix *a, Matrix *b, Matrix *c)
 {
-	bool res = false;
 	for (size_t y = 0; y < c->nrows; y++)
 	{
 		for (size_t x = 0; x < c->ncols; x++)
 		{
-			res = multiplyindex(a, b, c, x, y);
+			if (!multiplyindex(a, b, c, x, y))
+			{
+				return false;
+			}
 		}
 	}
-	return res;
+	return true;
 }
 
 // Dies ist die Hauptfunktion eines Threads:
@@ -196,12 +198,11 @@ void *thread_routine(void *threadarg_voidp)
 	{
 		if (i >= threadarg->max_index)
 		{
-			threadarg->success = true;
 			return threadarg;
 		}
 		y = i / threadarg->c->ncols;
 		x = i - (y * threadarg->c->ncols);
-		threadarg->success = multiplyindex(threadarg->a, threadarg->b, threadarg->c, x, y);
+		threadarg->success &= multiplyindex(threadarg->a, threadarg->b, threadarg->c, x, y);
 		if (!threadarg->success)
 		{
 			return threadarg;
@@ -241,7 +242,7 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 			threadargs[i].start_index = i * part;
 			threadargs[i].end_index = i * part + part;
 			threadargs[i].max_index = max;
-			threadargs[i].success = false;
+			threadargs[i].success = true;
 		}
 	}
 	else
@@ -254,7 +255,7 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 			threadargs[i].start_index = i;
 			threadargs[i].end_index = i + 1;
 			threadargs[i].max_index = max;
-			threadargs[i].success = false;
+			threadargs[i].success = true;
 		}
 	}
 
