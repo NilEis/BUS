@@ -196,6 +196,7 @@ void *thread_routine(void *threadarg_voidp)
 	{
 		if (i >= threadarg->max_index)
 		{
+			threadarg->success = true;
 			return threadarg;
 		}
 		y = i / threadarg->c->ncols;
