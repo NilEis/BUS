@@ -23,12 +23,12 @@ typedef struct ThreadArg
 	// ob er die Multiplikation erfolgreich durchgeführt
 	// hat.
 	// TODO
-	// start_index und end_index werden als Grenzen übergeben um dem Thread mitzuteilen welche Zellen berechnet werden sollen
+	// start_index und end_index werden als Grenzen übergeben um dem Thread mitzuteilen welche Zellen berechnet werden sollen.
+	// Um Speicherzugriffsfehler zu vermeiden wird auch die Obergrenze mitgegeben.
 	size_t start_index;
 	size_t end_index;
 	size_t max_index;
-	// Da weder der Pointer noch die Matrix veraendert werden sollen werden a und b als konstante Pointer
-	// zu Konstanten Matrizen uebergeben.
+	// a,b und werden als Pointer übergeben
 	Matrix *a;
 	Matrix *b;
 	Matrix *c;
@@ -155,6 +155,7 @@ void freeMatrix(Matrix *m)
 bool multiplyindex(Matrix *a, Matrix *b, Matrix *c, size_t x, size_t y)
 {
 	int v = 0;
+	// Wenn die multiplikation nicht möglich ist, wird false zurueckgegeben
 	if (y > a->ncols || x > b->nrows)
 	{
 		return false;
@@ -175,6 +176,7 @@ bool singlethreaded_multiply(Matrix *a, Matrix *b, Matrix *c)
 		{
 			if (!multiplyindex(a, b, c, x, y))
 			{
+				// Sollte es bei der Multiplikation zu Fehlern kommen, wird false zurueckgegeben
 				return false;
 			}
 		}
@@ -194,14 +196,18 @@ void *thread_routine(void *threadarg_voidp)
 	// TODO
 	size_t x;
 	size_t y;
+	// Berechne die Werte für die übergebenen Zellen
 	for (size_t i = threadarg->start_index; i < threadarg->end_index; i++)
 	{
+		// Sollte der Index ungültig sein wird der Thread beendet
 		if (i >= threadarg->max_index)
 		{
 			return threadarg;
 		}
+		// Berechne die Position des Indizes in der Matrix
 		y = i / threadarg->c->ncols;
 		x = i - (y * threadarg->c->ncols);
+		// Versuche den Wert zu berechnen, sollte dabei ein Fehler auftreten gibt die Methode zurück
 		threadarg->success &= multiplyindex(threadarg->a, threadarg->b, threadarg->c, x, y);
 		if (!threadarg->success)
 		{
@@ -223,13 +229,18 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	// Füllen Sie die Elemente des threadargs Array mit den notwendigen Daten
 	// TODO
 	size_t max = c->nrows * c->ncols;
+	//Sollten weniger Threads als Indizes existieren muss die Arbeit fair aufgeteilt werden.
 	if (max >= numthreads)
 	{
 		size_t part = 0;
-		if (c->nrows % numthreads == 0)
+		// Wenn die Anzahl der Indizes durch die Anzahl der Threads teilbar sein,
+		// bekommt jeder Thread die gleiche Anzahl an Indizes
+		if (max % numthreads == 0)
 		{
 			part = max / numthreads;
 		}
+		// Sollte dies nicht so sein, wird die Anzahl der Indizes pro Thread so erhöht, dass alle Indizes bearbeitet werden.
+		// Dadurch werden dem letzten Thread zwar zu hohe Indizes uebergeben, jedoch wird darauf im Thread selbst geprueft
 		else
 		{
 			part = max / (numthreads - 1);
@@ -247,6 +258,10 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	}
 	else
 	{
+		// Sollten mehr Threads vorhanden sein als Indizes,
+		// werden den Ueberzähligen ungültige Indizes uebergeben, so dass diese direkt zurueckgeben.
+		// Dies ist zwar keine gute Loesung, da man die Anzahl der Threads auch an die Zahl der Indizes anpassen könnte, jedoch
+		// waren wir uns unsicher ob wir dies in diesem Fall dürfen.
 		for (unsigned int i = 0; i < numthreads; i++)
 		{
 			threadargs[i].a = a;
@@ -265,6 +280,7 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	// TODO
 	for (unsigned int i = 0; i < numthreads; i++)
 	{
+		// Sollte ein Thread nicht erstellt werden können wird die Berechnung abgebrochen und alle bisher erstellten Threads abgebrochen.
 		if (pthread_create(&tinfo[i], NULL, thread_routine, (void *)&threadargs[i]) != 0)
 		{
 			i--;
@@ -291,6 +307,7 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 		// ebensolchen casten. Überprüfen Sie, ob der Thread erfolreich
 		// war.
 		// TODO
+		// Wenn eine Berechnung Fehlerhaft war wird false zurückgegeben
 		if (!res->success)
 		{
 			return false;
@@ -307,10 +324,11 @@ bool multiply(Matrix *a, Matrix *b, Matrix *c, int numthreads)
 	// Initialisieren Sie die Matrix c, sodass diese im Anschluss mit
 	// dem Ergebnis der Multiplikation gefüllt werden kann.
 	// TODO
-	//
+	// Bevor die Berechnung gestartet wird, wird die Ergebnismatrix erstellt
 	c->nrows = a->nrows;
 	c->ncols = b->ncols;
 	c->array = (int **)calloc(c->nrows, sizeof(int *));
+	// Sollte der Speicher nicht angefordert werden koennen, wird false zurueckgegeben
 	if (c->array == NULL)
 	{
 		return false;
@@ -318,8 +336,14 @@ bool multiply(Matrix *a, Matrix *b, Matrix *c, int numthreads)
 	for (size_t i = 0; i < c->nrows; i++)
 	{
 		c->array[i] = (int *)calloc(c->ncols, sizeof(int));
+		// Sollte der Speicher nicht angefordert werden koennen, wird false zurueckgegeben und der bisherige Speicher freigegeben
 		if (c->array[i] == NULL)
 		{
+			i--;
+			while (i--)
+			{
+				free(c->array[i]);
+			}
 			return false;
 		}
 	}
