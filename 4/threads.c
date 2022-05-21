@@ -280,7 +280,8 @@ bool multithreaded_multiply(Matrix *a, Matrix *b, Matrix *c, unsigned int numthr
 	// TODO
 	for (unsigned int i = 0; i < numthreads; i++)
 	{
-		// Sollte ein Thread nicht erstellt werden können wird die Berechnung abgebrochen und alle bisher erstellten Threads abgebrochen.
+		// Sollte ein Thread nicht erstellt werden können wird die Berechnung abgebrochen
+		// und alle bisher erstellten Threads abgebrochen.
 		if (pthread_create(&tinfo[i], NULL, thread_routine, (void *)&threadargs[i]) != 0)
 		{
 			i--;
